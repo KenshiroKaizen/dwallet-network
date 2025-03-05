@@ -332,7 +332,13 @@ impl DWalletMPCSession {
                     self.decryption_share.clone(),
                 )
             }
-            MPCProtocolInitData::NetworkDkg(key_scheme, _, _) => advance_network_dkg(
+            MPCProtocolInitData::NetworkDkg(key_scheme, _, _) => {
+                return Ok(AsynchronousRoundResult::Finalize {
+                    public_output: vec![1],
+                    private_output: vec![],
+                    malicious_parties: vec![],
+                });
+                return advance_network_dkg(
                 session_id,
                 &self.weighted_threshold_access_structure,
                 self.party_id,
@@ -346,7 +352,8 @@ impl DWalletMPCSession {
                         .ok_or(DwalletMPCError::MissingMPCPrivateInput)?,
                 )?,
                 self.epoch_store()?,
-            ),
+            );
+            },
             MPCProtocolInitData::EncryptedShareVerification(verification_data) => {
                 match verify_encrypted_share(verification_data) {
                     Ok(_) => Ok(AsynchronousRoundResult::Finalize {
